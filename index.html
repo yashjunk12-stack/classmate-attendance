@@ -1,81 +1,47 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#173f35">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="ClassMate">
-  <title>ClassMate · Attendance Tracker</title>
-  <link rel="manifest" href="manifest.json">
-  <link rel="stylesheet" href="style.css">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0d4037"><meta name="apple-mobile-web-app-capable" content="yes">
+<title>ClassMate Shillong</title><link rel="manifest" href="manifest.json"><link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="setupScreen" class="setup-screen hidden">
-    <div class="setup-card">
-      <div class="logo">CM</div>
-      <p class="eyebrow">CLASSMATE</p>
-      <h1>Your classes.<br>Your attendance.</h1>
-      <p class="setup-copy">Set up your dashboard in a few seconds.</p>
-      <label>Your name</label>
-      <input id="nameInput" type="text" placeholder="e.g. Yash" maxlength="30">
-      <div class="section-note"><strong>Section 6 · Term I</strong><span>Timetable loaded from the supplied Section 6 schedule.</span></div>
-      <button id="startBtn" class="primary wide">Start tracking</button>
-    </div>
+<div class="scenery"><div class="mist"></div><div class="hill h1"></div><div class="hill h2"></div><div class="hill h3"></div></div>
+
+<div id="setup" class="overlay hidden"><div class="setup card">
+  <div class="leaf">🌿</div><p class="kicker">CLASSMATE · IIM SHILLONG</p>
+  <h1>Your classes.<br><em>Your rhythm.</em></h1>
+  <p class="sub">A calmer way to keep your schedule and attendance in sight.</p>
+  <label>Your name</label><input id="nameInput" placeholder="e.g. Yash" maxlength="30">
+  <label>Your section</label><div id="sectionPicker" class="section-picker">
+    <button data-s="1">S1</button><button data-s="2">S2</button><button data-s="3">S3</button>
+    <button data-s="4">S4</button><button data-s="5">S5</button><button data-s="6">S6</button>
   </div>
+  <button id="startBtn" class="primary full">Enter ClassMate →</button>
+</div></div>
 
-  <header class="topbar">
-    <div class="brand"><div class="logo small">CM</div><div><strong>ClassMate</strong><span id="profileLine"></span></div></div>
-    <button id="settingsBtn" class="round-btn">⚙</button>
-  </header>
+<header><div class="brand"><div class="mark">CM</div><div><strong>ClassMate</strong><span id="profileLine">IIM Shillong</span></div></div><button id="settingsBtn" class="glass-btn">⚙</button></header>
 
-  <main class="container">
-    <section class="hero">
-      <div><p class="eyebrow light">MY DASHBOARD</p><h1 id="greeting"></h1><p id="currentDate"></p></div>
-      <div class="overall"><span>Overall attendance</span><strong id="overallAttendance">—</strong><small id="overallDetail"></small></div>
-    </section>
+<main>
+<section class="hero">
+ <div><p class="kicker pale">THE HILLS HAVE A PLAN</p><h1 id="greeting"></h1><p id="currentDate"></p></div>
+ <div class="hero-score"><span>Overall attendance</span><strong id="overall">—</strong><small id="overallDetail">No classes marked</small></div>
+</section>
 
-    <nav class="tabs">
-      <button class="tab active" data-view="today">Today</button>
-      <button class="tab" data-view="schedule">Schedule</button>
-      <button class="tab" data-view="attendance">Attendance</button>
-      <button class="tab" data-view="history">History</button>
-    </nav>
+<nav><button class="tab active" data-view="today">Today</button><button class="tab" data-view="schedule">Schedule</button><button class="tab" data-view="attendance">Attendance</button><button class="tab" data-view="mark">Mark past</button></nav>
 
-    <section id="todayView" class="view active">
-      <div class="heading"><div><p class="eyebrow">TODAY</p><h2>Today's schedule</h2></div><span class="pill" id="todayCount"></span></div>
-      <div id="todayClasses" class="class-list"></div>
-    </section>
+<section id="todayView" class="view active"><div class="title-row"><div><p class="kicker">TODAY</p><h2>Today's classes</h2></div><span id="todayCount" class="badge"></span></div><div id="todayList" class="stack"></div></section>
 
-    <section id="scheduleView" class="view">
-      <div class="heading"><div><p class="eyebrow">TERM I</p><h2>Full schedule</h2></div><input type="date" id="scheduleDate"></div>
-      <div class="week-nav"><button id="prevWeek" class="round-btn">←</button><strong id="weekLabel"></strong><button id="nextWeek" class="round-btn">→</button></div>
-      <div id="weekSchedule" class="week-grid"></div>
-    </section>
+<section id="scheduleView" class="view"><div class="title-row"><div><p class="kicker">TERM I</p><h2>Your schedule</h2></div><input id="scheduleDate" type="date"></div><div class="week-nav"><button id="prevWeek">←</button><strong id="weekLabel"></strong><button id="nextWeek">→</button></div><div id="weekGrid" class="week-grid"></div></section>
 
-    <section id="attendanceView" class="view">
-      <div class="heading"><div><p class="eyebrow">TRACKER</p><h2>Attendance overview</h2></div><span class="pill">Target 75%</span></div>
-      <div id="attendanceGrid" class="attendance-grid"></div>
-    </section>
+<section id="attendanceView" class="view"><div class="title-row"><div><p class="kicker">PROGRESS</p><h2>Attendance</h2></div><span class="badge">75% target</span></div><div id="attendanceGrid" class="attendance-grid"></div></section>
 
-    <section id="historyView" class="view">
-      <div class="heading"><div><p class="eyebrow">EDIT</p><h2>Attendance history</h2></div><select id="historyFilter"></select></div>
-      <div id="historyList" class="history-list"></div>
-    </section>
-  </main>
+<section id="markView" class="view"><div class="title-row"><div><p class="kicker">CATCH UP</p><h2>Mark previous classes</h2></div></div>
+<div class="filters card"><div><label>From</label><input id="fromDate" type="date"></div><div><label>To</label><input id="toDate" type="date"></div><div><label>Subject</label><select id="subjectFilter"><option value="ALL">All subjects</option></select></div><div><label>Status</label><select id="statusFilter"><option value="ALL">All statuses</option><option value="unmarked">Not marked</option><option value="present">Present</option><option value="absent">Absent</option></select></div><button id="resetFilters">Reset</button></div>
+<div id="pastList" class="past-list"></div></section>
+</main>
 
-  <div id="settingsModal" class="modal hidden">
-    <div class="modal-card">
-      <button id="closeSettings" class="modal-close">×</button>
-      <p class="eyebrow">SETTINGS</p><h2>Profile</h2>
-      <label>Name</label><input id="settingsName" type="text" maxlength="30">
-      <button id="saveSettings" class="primary wide">Save changes</button>
-      <button id="resetBtn" class="danger wide">Delete my attendance data</button>
-      <p class="privacy">Your attendance stays on this device and is not sent anywhere.</p>
-    </div>
-  </div>
-  <div id="toast" class="toast"></div>
-  <script src="timetable.js"></script><script src="script.js"></script>
-</body>
-</html>
+<div id="settings" class="overlay hidden"><div class="setup card"><button id="closeSettings" class="close">×</button><p class="kicker">SETTINGS</p><h2>Your profile</h2><label>Name</label><input id="settingsName"><label>Section</label><select id="settingsSection"><option value="1">Section 1</option><option value="2">Section 2</option><option value="3">Section 3</option><option value="4">Section 4</option><option value="5">Section 5</option><option value="6">Section 6</option></select><button id="saveSettings" class="primary full">Save changes</button><button id="clearData" class="danger full">Delete attendance data</button><p class="privacy">Attendance is saved only in this browser on this device.</p></div></div>
+<div id="toast" class="toast"></div>
+<script src="timetable.js"></script><script src="script.js"></script>
+</body></html>
