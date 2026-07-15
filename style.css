@@ -29,3 +29,28 @@ input,select{border:1px solid var(--line);background:rgba(255,255,255,.78);borde
 .course-progress{height:7px;background:rgba(13,64,55,.08);border-radius:99px;overflow:hidden;margin-top:14px}.course-progress div{height:100%;background:linear-gradient(90deg,var(--pine2),#63a67c);border-radius:99px}
 .course-caption{display:flex;justify-content:space-between;color:var(--muted);font-size:10px;margin-top:6px}
 @media(max-width:760px){.dashboard-summary{grid-template-columns:1fr 1fr}.dashboard-summary .summary-tile:first-child{grid-column:1/-1}.subject-dashboard{grid-template-columns:1fr}.subject-numbers{grid-template-columns:repeat(4,1fr)}}
+
+/* V5 compact traffic-light dashboard */
+.dashboard-summary{grid-template-columns:repeat(3,minmax(0,180px));justify-content:start;gap:10px;margin-bottom:13px}
+.summary-tile{padding:13px 15px;border-radius:15px}
+.summary-tile strong{font-size:24px;margin-top:3px}
+.subject-dashboard{grid-template-columns:repeat(3,1fr);gap:11px}
+.subject-card{padding:15px;border-radius:16px;position:relative}
+.subject-card.level-green{border-left:5px solid var(--green)}
+.subject-card.level-yellow{border-left:5px solid #d39a17}
+.subject-card.level-red{border-left:5px solid var(--red)}
+.subject-head h3{font-size:16px;margin-top:2px}
+.credit-pill{padding:5px 8px;font-size:9px}
+.subject-numbers{margin:12px 0 9px;gap:6px}
+.metric{padding:8px 5px;border-radius:9px}
+.metric strong{font-size:16px}.metric span{font-size:8px}
+.attendance-value.green{color:var(--green)}
+.attendance-value.yellow{color:#b67a00}
+.attendance-value.red{color:var(--red)}
+.course-progress{margin-top:9px;height:6px}
+.miss-box{padding:9px 10px;margin-top:9px;border-radius:10px}
+.miss-box strong{font-size:12px}.miss-box span{font-size:9px}
+.dots{gap:4px}.dot{width:9px;height:9px}
+.course-caption{font-size:9px;margin-top:4px}
+@media(max-width:980px){.subject-dashboard{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:760px){.dashboard-summary{grid-template-columns:repeat(3,1fr)}.dashboard-summary .summary-tile:first-child{grid-column:auto}.summary-tile{padding:11px}.summary-tile strong{font-size:20px}.subject-dashboard{grid-template-columns:1fr}}

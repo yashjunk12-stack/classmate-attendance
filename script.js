@@ -16,30 +16,42 @@ const COURSE_RULES={
 "SDM":{credits:4,total:20,miss:3},"SGD":{credits:4,total:20,miss:3},
 "S&B":{credits:2,total:10,miss:2}
 };
+function attendanceColour(pct){
+ if(pct===null)return "green";
+ if(pct>=85)return "green";
+ if(pct>=75)return "yellow";
+ return "red";
+}
+function allowanceState(absent,limit){
+ let remaining=limit-absent;
+ if(remaining>=2)return {level:"green",box:"miss-safe",text:`Safe · ${remaining} misses left`};
+ if(remaining===1)return {level:"yellow",box:"miss-watch",text:"Caution · only 1 miss left"};
+ if(remaining===0)return {level:"red",box:"miss-risk",text:"No misses left"};
+ return {level:"red",box:"miss-risk",text:`Limit crossed by ${Math.abs(remaining)} ${Math.abs(remaining)===1?"class":"classes"}`};
+}
 function renderAttendance(){
  let codes=Object.keys(COURSE_RULES),totalPresent=0,totalMarked=0,totalAbsent=0;
  let cards=codes.map(code=>{
-   let s=stats(code),r=COURSE_RULES[code],absent=s.t-s.p,remaining=Math.max(0,r.miss-absent),over=Math.max(0,absent-r.miss);
+   let s=stats(code),r=COURSE_RULES[code],absent=s.t-s.p;
+   let state=allowanceState(absent,r.miss),pctColour=attendanceColour(s.pct);
    totalPresent+=s.p;totalMarked+=s.t;totalAbsent+=absent;
-   let status=over>0?"miss-risk":remaining===0?"miss-risk":remaining===1?"miss-watch":"miss-safe";
-   let statusText=over>0?`${over} over your miss limit`:remaining===0?"No more misses available":`You can miss ${remaining} more ${remaining===1?"class":"classes"}`;
    let dots=Array.from({length:r.miss},(_,i)=>`<i class="dot ${i<Math.min(absent,r.miss)?"used":""}"></i>`).join("");
    let completed=Math.min(100,s.t/r.total*100);
-   return `<article class="subject-card">
-    <div class="subject-head"><div><span class="code">${code}</span><h3>${classes().find(c=>c.code===code)?.name||code}</h3></div><span class="credit-pill">${r.credits} credit · ${r.total} classes</span></div>
+   return `<article class="subject-card level-${state.level}">
+    <div class="subject-head"><div><span class="code">${code}</span><h3>${classes().find(c=>c.code===code)?.name||code}</h3></div><span class="credit-pill">${r.credits} cr · ${r.total} classes</span></div>
     <div class="subject-numbers">
       <div class="metric"><strong>${s.p}</strong><span>Present</span></div>
       <div class="metric"><strong>${absent}</strong><span>Absent</span></div>
       <div class="metric"><strong>${s.t}</strong><span>Held</span></div>
-      <div class="metric"><strong>${s.pct===null?"—":s.pct.toFixed(0)+"%"}</strong><span>Attendance</span></div>
+      <div class="metric"><strong class="attendance-value ${pctColour}">${s.pct===null?"—":s.pct.toFixed(0)+"%"}</strong><span>Attendance</span></div>
     </div>
     <div class="course-progress"><div style="width:${completed}%"></div></div>
-    <div class="course-caption"><span>${s.t} classes marked</span><span>${r.total} planned</span></div>
-    <div class="miss-box ${status}"><div><strong>${statusText}</strong><br><span>${r.credits}-credit rule: maximum ${r.miss} misses</span></div><div class="dots">${dots}</div></div>
+    <div class="course-caption"><span>${s.t} marked</span><span>${r.total} planned</span></div>
+    <div class="miss-box ${state.box}"><div><strong>${state.text}</strong><br><span>Maximum ${r.miss} absences for this subject</span></div><div class="dots">${dots}</div></div>
    </article>`
  }).join("");
- let overall=totalMarked?(totalPresent/totalMarked*100).toFixed(1)+"%":"—";
- $("dashboardSummary").innerHTML=`<div class="summary-tile"><span>OVERALL ATTENDANCE</span><strong>${overall}</strong></div><div class="summary-tile"><span>TOTAL PRESENT</span><strong>${totalPresent}</strong></div><div class="summary-tile"><span>TOTAL ABSENT</span><strong>${totalAbsent}</strong></div>`;
+ let overallPct=totalMarked?totalPresent/totalMarked*100:null,overallColour=attendanceColour(overallPct);
+ $("dashboardSummary").innerHTML=`<div class="summary-tile"><span>OVERALL ATTENDANCE</span><strong class="attendance-value ${overallColour}">${overallPct===null?"—":overallPct.toFixed(1)+"%"}</strong></div><div class="summary-tile"><span>TOTAL PRESENT</span><strong>${totalPresent}</strong></div><div class="summary-tile"><span>TOTAL ABSENT</span><strong>${totalAbsent}</strong></div>`;
  $("attendanceGrid").innerHTML=cards;
 }
 function updateOverall(){let m=classes().filter(c=>attendance[c.id]),p=m.filter(c=>attendance[c.id]==="present").length;$("overall").textContent=m.length?(p/m.length*100).toFixed(1)+"%":"—";$("overallDetail").textContent=m.length?`${p} of ${m.length} marked classes attended`:"No classes marked yet"}
