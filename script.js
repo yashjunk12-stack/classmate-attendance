@@ -10,7 +10,38 @@ function renderToday(){let cs=classes().filter(c=>c.date===localDate()),ev=SPECI
 function mark(id,status){attendance[id]=attendance[id]===status?undefined:status;if(!attendance[id])delete attendance[id];save();renderToday();renderAttendance();renderPast();updateOverall();toast(status==="present"?"Marked present ✓":"Marked absent")}
 function stats(code){let m=classes().filter(c=>c.code===code&&attendance[c.id]),p=m.filter(c=>attendance[c.id]==="present").length;return{p,t:m.length,pct:m.length?p/m.length*100:null}}
 function advice(p,t){if(!t)return{text:"Mark a class to begin tracking.",type:"watch"};let x=p/t*100;if(x>=75){let n=0;while(p/(t+n+1)*100>=75)n++;return n?{text:`You can miss ${n} more ${n===1?"class":"classes"} and remain at or above 75%.`,type:x>=85?"safe":"watch"}:{text:"At the 75% line — attend the next class to create a buffer.",type:"watch"}}let n=0;while((p+n)/(t+n)*100<75)n++;return{text:`Attend the next ${n} ${n===1?"class":"classes"} consecutively to reach 75%.`,type:"risk"}}
-function renderAttendance(){$("attendanceGrid").innerHTML=Object.keys({ME:1,FRA:1,DMV:1,MM:1,SDM:1,SGD:1,"S&B":1}).map(code=>{let s=stats(code),a=advice(s.p,s.t);return `<article class="attendance-card"><div class="attendance-top"><div><span class="code">${code}</span><h3>${classes().find(c=>c.code===code)?.name||code}</h3></div><div class="pct">${s.pct===null?"—":s.pct.toFixed(1)+"%"}</div></div><div class="progress"><div class="bar" style="width:${s.pct||0}%"></div></div><div class="meta"><span>${s.p} attended</span><span>${s.t} classes marked</span></div><div class="advice ${a.type}">${a.text}</div></article>`}).join("")}
+const COURSE_RULES={
+"ME":{credits:4,total:20,miss:3},"FRA":{credits:4,total:20,miss:3},
+"DMV":{credits:4,total:20,miss:3},"MM":{credits:4,total:20,miss:3},
+"SDM":{credits:4,total:20,miss:3},"SGD":{credits:4,total:20,miss:3},
+"S&B":{credits:2,total:10,miss:2}
+};
+function renderAttendance(){
+ let codes=Object.keys(COURSE_RULES),totalPresent=0,totalMarked=0,totalAbsent=0;
+ let cards=codes.map(code=>{
+   let s=stats(code),r=COURSE_RULES[code],absent=s.t-s.p,remaining=Math.max(0,r.miss-absent),over=Math.max(0,absent-r.miss);
+   totalPresent+=s.p;totalMarked+=s.t;totalAbsent+=absent;
+   let status=over>0?"miss-risk":remaining===0?"miss-risk":remaining===1?"miss-watch":"miss-safe";
+   let statusText=over>0?`${over} over your miss limit`:remaining===0?"No more misses available":`You can miss ${remaining} more ${remaining===1?"class":"classes"}`;
+   let dots=Array.from({length:r.miss},(_,i)=>`<i class="dot ${i<Math.min(absent,r.miss)?"used":""}"></i>`).join("");
+   let completed=Math.min(100,s.t/r.total*100);
+   return `<article class="subject-card">
+    <div class="subject-head"><div><span class="code">${code}</span><h3>${classes().find(c=>c.code===code)?.name||code}</h3></div><span class="credit-pill">${r.credits} credit · ${r.total} classes</span></div>
+    <div class="subject-numbers">
+      <div class="metric"><strong>${s.p}</strong><span>Present</span></div>
+      <div class="metric"><strong>${absent}</strong><span>Absent</span></div>
+      <div class="metric"><strong>${s.t}</strong><span>Held</span></div>
+      <div class="metric"><strong>${s.pct===null?"—":s.pct.toFixed(0)+"%"}</strong><span>Attendance</span></div>
+    </div>
+    <div class="course-progress"><div style="width:${completed}%"></div></div>
+    <div class="course-caption"><span>${s.t} classes marked</span><span>${r.total} planned</span></div>
+    <div class="miss-box ${status}"><div><strong>${statusText}</strong><br><span>${r.credits}-credit rule: maximum ${r.miss} misses</span></div><div class="dots">${dots}</div></div>
+   </article>`
+ }).join("");
+ let overall=totalMarked?(totalPresent/totalMarked*100).toFixed(1)+"%":"—";
+ $("dashboardSummary").innerHTML=`<div class="summary-tile"><span>OVERALL ATTENDANCE</span><strong>${overall}</strong></div><div class="summary-tile"><span>TOTAL PRESENT</span><strong>${totalPresent}</strong></div><div class="summary-tile"><span>TOTAL ABSENT</span><strong>${totalAbsent}</strong></div>`;
+ $("attendanceGrid").innerHTML=cards;
+}
 function updateOverall(){let m=classes().filter(c=>attendance[c.id]),p=m.filter(c=>attendance[c.id]==="present").length;$("overall").textContent=m.length?(p/m.length*100).toFixed(1)+"%":"—";$("overallDetail").textContent=m.length?`${p} of ${m.length} marked classes attended`:"No classes marked yet"}
 function monday(d){let x=new Date(d),day=x.getDay();x.setDate(x.getDate()+(day===0?-6:1-day));x.setHours(0,0,0,0);return x}
 function renderWeek(){let mon=monday(anchor),sun=new Date(mon);sun.setDate(mon.getDate()+6);$("weekLabel").textContent=`${mon.toLocaleDateString("en-IN",{day:"numeric",month:"short"})} – ${sun.toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"})}`;let html="";for(let i=0;i<7;i++){let d=new Date(mon);d.setDate(mon.getDate()+i);let k=localDate(d),cs=classes().filter(c=>c.date===k),ev=SPECIAL_EVENTS.filter(e=>e.date===k);html+=`<article class="day ${k===localDate()?"today":""}"><div class="day-head"><span>${d.toLocaleDateString("en-IN",{weekday:"short"})}</span><strong>${d.getDate()} ${d.toLocaleDateString("en-IN",{month:"short"})}</strong></div>${cs.map(c=>`<div class="mini"><strong>${c.code}</strong><span>${c.start} – ${c.end}</span></div>`).join("")}${ev.map(e=>`<div class="event">${e.title}</div>`).join("")}</article>`}$("weekGrid").innerHTML=html;$("scheduleDate").value=localDate(anchor)}

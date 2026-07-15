@@ -1,6 +1,6 @@
-CLASSMATE SHILLONG V3
+CLASSMATE SHILLONG V4
 
-Upload/replace ALL SIX files in your existing GitHub repository:
+Replace these six files in the existing GitHub repository:
 index.html
 style.css
 script.js
@@ -8,21 +8,18 @@ timetable.js
 manifest.json
 sw.js
 
-The timetable was parsed from the full Term I PGP 2026-28 workbook.
-S1 means Section 1, S2 means Section 2, through S6.
+NEW IN V4
+- Attendance tab renamed Dashboard
+- Subject-wise attendance dashboard
+- 4-credit subjects: 20 planned classes, maximum 3 misses
+- 2-credit S&B: 10 planned classes, maximum 2 misses
+- Present, Absent, Held, and Attendance % for every subject
+- Visual miss allowance dots
+- Shows exactly how many more classes can be missed
+- Red warning when no misses remain or miss limit is crossed
+- Overall attendance, total present, and total absent summary
+- Existing section filters, past attendance marking, timetable, and data storage preserved
 
-Features:
-- Name + Section 1-6 first-time setup
-- Correct odd/even section slot timings from workbook
-- Section-specific room and timetable
-- Today view
-- Weekly schedule
-- Subject attendance and 75% calculator
-- Mark Past page showing all classes up to today
-- From/To date, subject, and status filters
-- Previous attendance correction
-- Scenic Shillong-inspired CSS background
-- Mobile/PWA support
-
-After replacing files on GitHub, wait for Pages to redeploy. If an old version is cached,
-refresh once or close and reopen the installed app.
+GitHub Pages:
+Upload the six files with the same names and commit the changes.
+The service worker cache has been bumped to classmate-v4.

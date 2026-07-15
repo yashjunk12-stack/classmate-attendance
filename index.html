@@ -28,13 +28,17 @@
  <div class="hero-score"><span>Overall attendance</span><strong id="overall">—</strong><small id="overallDetail">No classes marked</small></div>
 </section>
 
-<nav><button class="tab active" data-view="today">Today</button><button class="tab" data-view="schedule">Schedule</button><button class="tab" data-view="attendance">Attendance</button><button class="tab" data-view="mark">Mark past</button></nav>
+<nav><button class="tab active" data-view="today">Today</button><button class="tab" data-view="schedule">Schedule</button><button class="tab" data-view="attendance">Dashboard</button><button class="tab" data-view="mark">Mark past</button></nav>
 
 <section id="todayView" class="view active"><div class="title-row"><div><p class="kicker">TODAY</p><h2>Today's classes</h2></div><span id="todayCount" class="badge"></span></div><div id="todayList" class="stack"></div></section>
 
 <section id="scheduleView" class="view"><div class="title-row"><div><p class="kicker">TERM I</p><h2>Your schedule</h2></div><input id="scheduleDate" type="date"></div><div class="week-nav"><button id="prevWeek">←</button><strong id="weekLabel"></strong><button id="nextWeek">→</button></div><div id="weekGrid" class="week-grid"></div></section>
 
-<section id="attendanceView" class="view"><div class="title-row"><div><p class="kicker">PROGRESS</p><h2>Attendance</h2></div><span class="badge">75% target</span></div><div id="attendanceGrid" class="attendance-grid"></div></section>
+<section id="attendanceView" class="view">
+<div class="title-row"><div><p class="kicker">ATTENDANCE DASHBOARD</p><h2>Your subject-wise position</h2></div><span class="badge">Stay attendance-safe</span></div>
+<div id="dashboardSummary" class="dashboard-summary"></div>
+<div id="attendanceGrid" class="subject-dashboard"></div>
+</section>
 
 <section id="markView" class="view"><div class="title-row"><div><p class="kicker">CATCH UP</p><h2>Mark previous classes</h2></div></div>
 <div class="filters card"><div><label>From</label><input id="fromDate" type="date"></div><div><label>To</label><input id="toDate" type="date"></div><div><label>Subject</label><select id="subjectFilter"><option value="ALL">All subjects</option></select></div><div><label>Status</label><select id="statusFilter"><option value="ALL">All statuses</option><option value="unmarked">Not marked</option><option value="present">Present</option><option value="absent">Absent</option></select></div><button id="resetFilters">Reset</button></div>
