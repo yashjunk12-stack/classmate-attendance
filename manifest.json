@@ -1,0 +1,9 @@
+{
+  "name": "ClassMate Attendance Tracker",
+  "short_name": "ClassMate",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f5f7f6",
+  "theme_color": "#173f35",
+  "description": "Personal class schedule and attendance tracker"
+}

@@ -1,0 +1,41 @@
+const PROFILE_KEY="classmate-profile-v2";
+let profile=JSON.parse(localStorage.getItem(PROFILE_KEY)||"null");
+let attendance={};
+let scheduleAnchor=new Date();
+const $=id=>document.getElementById(id);
+const dataKey=()=>`classmate-attendance-v2-section-6`;
+const sectionClasses=()=>TIMETABLE.filter(c=>c.section==="6");
+function loadAttendance(){attendance=JSON.parse(localStorage.getItem(dataKey())||"{}")}
+function saveAttendance(){localStorage.setItem(dataKey(),JSON.stringify(attendance))}
+function localKey(d=new Date()){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
+function parseDate(s){let [y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d)}
+function fmt(d){return new Intl.DateTimeFormat("en-IN",{weekday:"long",day:"numeric",month:"long",year:"numeric"}).format(d)}
+function boot(){
+ if(!profile){$("setupScreen").classList.remove("hidden");return}
+ loadAttendance();$("setupScreen").classList.add("hidden");renderAll()
+}
+$("startBtn").onclick=()=>{let name=$("nameInput").value.trim();if(!name){toast("Enter your name");return}profile={name};localStorage.setItem(PROFILE_KEY,JSON.stringify(profile));loadAttendance();$("setupScreen").classList.add("hidden");renderAll()};
+function renderAll(){
+ const h=new Date().getHours(),g=h<12?"Good morning":h<17?"Good afternoon":"Good evening";
+ $("greeting").textContent=`${g}, ${profile.name} 👋`;$("currentDate").textContent=fmt(new Date());$("profileLine").textContent=`Section 6 · Term I`;
+ renderToday();renderAttendance();renderHistory();renderWeek();updateOverall()
+}
+function card(c){let s=attendance[c.id];return `<article class="class-card"><div class="class-time"><strong>${c.start}</strong><span>to ${c.end}</span></div><div class="class-info"><span class="code">${c.code}</span><h3>${c.name}</h3><p>${c.room}</p></div><div class="actions"><button class="action present ${s==="present"?"selected":""}" onclick="mark('${c.id}','present')">✓ Present</button><button class="action absent ${s==="absent"?"selected":""}" onclick="mark('${c.id}','absent')">✕ Absent</button></div></article>`}
+function renderToday(){let cs=sectionClasses().filter(c=>c.date===localKey()),ev=SPECIAL_EVENTS.filter(e=>e.date===localKey());$("todayCount").textContent=`${cs.length} ${cs.length===1?"class":"classes"}`;$("todayClasses").innerHTML=cs.length?cs.map(card).join(""):`<div class="empty"><strong>No classes today 🎉</strong><span>${ev.map(e=>e.title).join(" · ")||"No classes scheduled."}</span></div>`}
+function mark(id,status){attendance[id]=attendance[id]===status?undefined:status;if(!attendance[id])delete attendance[id];saveAttendance();renderToday();renderAttendance();renderHistory();updateOverall();toast(status==="present"?"Marked present ✓":"Marked absent")}
+function stats(code){let cs=sectionClasses().filter(c=>c.code===code),m=cs.filter(c=>attendance[c.id]),p=m.filter(c=>attendance[c.id]==="present").length;return{p,t:m.length,pct:m.length?p/m.length*100:null}}
+function advice(p,t){if(!t)return{text:"Mark a class to start tracking.",type:"watch"};let pct=p/t*100;if(pct>=75){let miss=0;while(p/(t+miss+1)*100>=75)miss++;return miss?{text:`You can miss ${miss} more ${miss===1?"class":"classes"} and stay at or above 75%.`,type:pct>=85?"safe":"watch"}:{text:"At the 75% line — attend the next class to build a buffer.",type:"watch"}}let need=0;while((p+need)/(t+need)*100<75)need++;return{text:`Attend the next ${need} ${need===1?"class":"classes"} consecutively to reach 75%.`,type:"risk"}}
+function renderAttendance(){let codes=["ME","FRA","DMV","MM","SDM","SGD","S&B"];$("attendanceGrid").innerHTML=codes.map(code=>{let s=stats(code),a=advice(s.p,s.t),pct=s.pct===null?"—":`${s.pct.toFixed(1)}%`;return `<article class="attendance-card"><div class="attendance-top"><div><span class="code">${code}</span><h3>${sectionClasses().find(c=>c.code===code)?.name||code}</h3></div><div class="pct">${pct}</div></div><div class="progress"><div class="bar" style="width:${s.pct||0}%"></div></div><div class="meta"><span>${s.p} attended</span><span>${s.t} classes marked</span></div><div class="advice ${a.type}">${a.text}</div></article>`}).join("")}
+function updateOverall(){let m=sectionClasses().filter(c=>attendance[c.id]),p=m.filter(c=>attendance[c.id]==="present").length;$("overallAttendance").textContent=m.length?`${(p/m.length*100).toFixed(1)}%`:"—";$("overallDetail").textContent=m.length?`${p} of ${m.length} marked classes attended`:"No classes marked yet"}
+function monday(d){let x=new Date(d),day=x.getDay();x.setDate(x.getDate()+(day===0?-6:1-day));x.setHours(0,0,0,0);return x}
+function renderWeek(){let mon=monday(scheduleAnchor),sun=new Date(mon);sun.setDate(mon.getDate()+6);$("weekLabel").textContent=`${mon.toLocaleDateString("en-IN",{day:"numeric",month:"short"})} – ${sun.toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"})}`;let html="";for(let i=0;i<7;i++){let d=new Date(mon);d.setDate(mon.getDate()+i);let k=localKey(d),cs=sectionClasses().filter(c=>c.date===k),ev=SPECIAL_EVENTS.filter(e=>e.date===k);html+=`<article class="day ${k===localKey()?"today":""}"><div class="day-head"><span>${d.toLocaleDateString("en-IN",{weekday:"short"})}</span><strong>${d.getDate()} ${d.toLocaleDateString("en-IN",{month:"short"})}</strong></div>${cs.map(c=>`<div class="mini"><strong>${c.code}</strong><span>${c.start} – ${c.end}</span></div>`).join("")}${ev.map(e=>`<div class="event">${e.title}</div>`).join("")}</article>`}$("weekSchedule").innerHTML=html;$("scheduleDate").value=localKey(scheduleAnchor)}
+function renderHistory(){let codes=["ALL","ME","FRA","DMV","MM","SDM","SGD","S&B"],old=$("historyFilter").value||"ALL";$("historyFilter").innerHTML=codes.map(c=>`<option value="${c}">${c==="ALL"?"All subjects":c}</option>`).join("");$("historyFilter").value=old;let rows=sectionClasses().filter(c=>attendance[c.id]&&(old==="ALL"||c.code===old)).sort((a,b)=>b.date.localeCompare(a.date)||b.start.localeCompare(a.start));$("historyList").innerHTML=rows.length?rows.map(c=>`<article class="history-row"><div class="history-date">${parseDate(c.date).toLocaleDateString("en-IN",{day:"numeric",month:"short"})}<br>${c.start}</div><div><span class="code">${c.code}</span><strong style="display:block;margin-top:4px">${c.name}</strong></div><div class="actions"><button class="action present ${attendance[c.id]==="present"?"selected":""}" onclick="mark('${c.id}','present')">✓ Present</button><button class="action absent ${attendance[c.id]==="absent"?"selected":""}" onclick="mark('${c.id}','absent')">✕ Absent</button></div></article>`).join(""):`<div class="empty"><strong>No attendance history yet</strong><span>Your marked classes will appear here.</span></div>`}
+$("historyFilter").onchange=renderHistory;
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active"));document.querySelectorAll(".view").forEach(x=>x.classList.remove("active"));t.classList.add("active");$(`${t.dataset.view}View`).classList.add("active");if(t.dataset.view==="schedule")renderWeek()});
+$("prevWeek").onclick=()=>{scheduleAnchor.setDate(scheduleAnchor.getDate()-7);renderWeek()};$("nextWeek").onclick=()=>{scheduleAnchor.setDate(scheduleAnchor.getDate()+7);renderWeek()};$("scheduleDate").onchange=e=>{if(e.target.value)scheduleAnchor=parseDate(e.target.value);renderWeek()};
+$("settingsBtn").onclick=()=>{$("settingsName").value=profile.name;$("settingsModal").classList.remove("hidden")};$("closeSettings").onclick=()=>$("settingsModal").classList.add("hidden");
+$("saveSettings").onclick=()=>{let n=$("settingsName").value.trim();if(!n)return toast("Enter your name");profile={name:n};localStorage.setItem(PROFILE_KEY,JSON.stringify(profile));loadAttendance();$("settingsModal").classList.add("hidden");renderAll();toast("Profile updated")};
+$("resetBtn").onclick=()=>{if(confirm("Delete all attendance saved for your current section on this device?")){attendance={};saveAttendance();$("settingsModal").classList.add("hidden");renderAll();toast("Attendance deleted")}};
+function toast(m){let t=$("toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1600)}
+if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js"));
+boot();
